@@ -12,13 +12,15 @@ public sealed class StudentRepository : IStudentRepository
     public StudentRepository(ApplicationDbContext db) => _db = db;
 
     public Task<Student?> GetByIdAsync(Guid id, CancellationToken ct)
-        => _db.Students.FindAsync([id], ct).AsTask();
+        => _db.Students.FirstOrDefaultAsync(s => s.Id == id, ct);
 
     public Task<Student?> GetByStudentNumberAsync(string studentNumber, CancellationToken ct)
         => _db.Students.FirstOrDefaultAsync(s => s.StudentNumber == studentNumber, ct);
 
-    public Task<Student?> GetByStudentNumberAsync(string studentNumber, CancellationToken ct)
-        => _db.Students.FirstOrDefaultAsync(s => s.StudentNumber == studentNumber, ct);
+    public async Task<bool> IsStudentNumberUniqueAsync(string studentNumber, CancellationToken ct)
+    {
+        return !await _db.Students.AnyAsync(s => s.StudentNumber == studentNumber, ct);
+    }
 
     public Task AddAsync(Student student, CancellationToken ct)
     {
