@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Npgsql;
 using Testcontainers.PostgreSql;
 using UCMS.Infrastructure.Persistence;
