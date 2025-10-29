@@ -4,33 +4,47 @@ public enum SubmissionStatus { Open, InProgress, Completed, Cancelled }
 
 public sealed class Submission
 {
-    public Guid Id { get; private set; }
-    public Guid AssignmentId { get; private set; }
-    public Guid StudentId { get; private set; }
+    public Guid Id { get; }
+    public Guid AssignmentId { get; }
+    public Guid StudentId { get; }
     public DateTime SubmittedAt { get; private set; }
-    public string ContentUrl { get; private set; } = default!;
+    public string ContentUrl { get; private set; }
     public SubmissionStatus Status { get; private set; }
     public decimal? Grade { get; private set; }
     public string? CompletionNotes { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+    public DateTime CreatedAt { get; }
     public DateTime? UpdatedAt { get; private set; }
 
-    private Submission() { }
+    private Submission(Guid id, Guid assignmentId, Guid studentId, DateTime submittedAt, string contentUrl, SubmissionStatus status, decimal? grade, string? completionNotes, DateTime createdAt, DateTime? updatedAt)
+    {
+        Id = id;
+        AssignmentId = assignmentId;
+        StudentId = studentId;
+        SubmittedAt = submittedAt;
+        ContentUrl = contentUrl;
+        Status = status;
+        Grade = grade;
+        CompletionNotes = completionNotes;
+        CreatedAt = createdAt;
+        UpdatedAt = updatedAt;
+    }
 
     public static Submission New(Guid id, Guid assignmentId, Guid studentId, string contentUrl, DateTime submittedAtUtc)
     {
         if (id == Guid.Empty || assignmentId == Guid.Empty || studentId == Guid.Empty) throw new ArgumentException("Ids");
         if (string.IsNullOrWhiteSpace(contentUrl) || contentUrl.Length > 500) throw new ArgumentException("ContentUrl");
-        return new Submission
-        {
-            Id = id,
-            AssignmentId = assignmentId,
-            StudentId = studentId,
-            ContentUrl = contentUrl.Trim(),
-            SubmittedAt = submittedAtUtc,
-            Status = SubmissionStatus.Open,
-            CreatedAt = DateTime.UtcNow
-        };
+
+        return new Submission(
+            id,
+            assignmentId,
+            studentId,
+            submittedAtUtc,
+            contentUrl.Trim(),
+            SubmissionStatus.Open,
+            null,
+            null,
+            DateTime.UtcNow,
+            null);
     }
 
     public void UpdateContent(string contentUrl)

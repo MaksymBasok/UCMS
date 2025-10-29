@@ -10,6 +10,7 @@ public sealed class SubmissionConfiguration : IEntityTypeConfiguration<Submissio
     {
         b.ToTable("submissions");
         b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
         b.Property(x => x.ContentUrl).IsRequired().HasMaxLength(500);
         b.Property(x => x.Status).IsRequired();
         b.Property(x => x.CreatedAt).IsRequired();

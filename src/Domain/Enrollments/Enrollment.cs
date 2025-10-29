@@ -2,15 +2,24 @@
 
 public sealed class Enrollment
 {
-    public Guid Id { get; private set; }
-    public Guid StudentId { get; private set; }
-    public Guid CourseId { get; private set; }
+    public Guid Id { get; }
+    public Guid StudentId { get; }
+    public Guid CourseId { get; }
     public EnrollmentStatus Status { get; private set; }
-    public DateTime EnrolledAt { get; private set; }
+    public DateTime EnrolledAt { get; }
     public DateTime? CompletedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
-    private Enrollment() { }
+    private Enrollment(Guid id, Guid studentId, Guid courseId, EnrollmentStatus status, DateTime enrolledAt, DateTime? completedAt, DateTime? updatedAt)
+    {
+        Id = id;
+        StudentId = studentId;
+        CourseId = courseId;
+        Status = status;
+        EnrolledAt = enrolledAt;
+        CompletedAt = completedAt;
+        UpdatedAt = updatedAt;
+    }
 
     public static Enrollment New(Guid id, Guid studentId, Guid courseId)
     {
@@ -18,14 +27,14 @@ public sealed class Enrollment
         if (studentId == Guid.Empty) throw new ArgumentException("StudentId");
         if (courseId == Guid.Empty) throw new ArgumentException("CourseId");
 
-        return new Enrollment
-        {
-            Id = id,
-            StudentId = studentId,
-            CourseId = courseId,
-            Status = EnrollmentStatus.Active,
-            EnrolledAt = DateTime.UtcNow
-        };
+        return new Enrollment(
+            id,
+            studentId,
+            courseId,
+            EnrollmentStatus.Active,
+            DateTime.UtcNow,
+            null,
+            null);
     }
 
     public void Complete()
