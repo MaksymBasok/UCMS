@@ -67,8 +67,11 @@ app.UseExceptionHandler(a => a.Run(async ctx =>
 }));
 
 // Міграції + сидінг
-using (var scope = app.Services.CreateScope())
+var skipMigrations = builder.Configuration.GetValue<bool>("Testing:SkipMigrations");
+
+if (!skipMigrations)
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await db.Database.MigrateAsync();
     await DbInitializer.SeedAsync(db);
@@ -80,3 +83,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.MapControllers();
 app.Run();
+
+public partial class Program
+{
+}

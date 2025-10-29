@@ -19,18 +19,28 @@ public static class ConfigurePersistenceServices
 {
     public static void AddPersistenceServices(this IServiceCollection services, IConfiguration cfg)
     {
-        var cs = cfg.GetConnectionString("Postgres")
-                 ?? "Host=localhost;Port=5432;Database=ucms_db;Username=postgres;Password=4321";
+        var useInMemory = cfg.GetValue<bool>("Testing:UseInMemoryDatabase");
 
-        var dsb = new NpgsqlDataSourceBuilder(cs);
-        dsb.EnableDynamicJson();
-        var dataSource = dsb.Build();
+        if (useInMemory)
+        {
+            services.AddDbContext<ApplicationDbContext>(opt => opt
+                .UseInMemoryDatabase("integration-tests"));
+        }
+        else
+        {
+            var cs = cfg.GetConnectionString("Postgres")
+                     ?? "Host=localhost;Port=5432;Database=ucms_db;Username=postgres;Password=4321";
 
-        services.AddDbContext<ApplicationDbContext>(opt => opt
-    .UseNpgsql(dataSource, b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
-    .UseSnakeCaseNamingConvention()
-    .EnableSensitiveDataLogging()
-    .EnableDetailedErrors());
+            var dsb = new NpgsqlDataSourceBuilder(cs);
+            dsb.EnableDynamicJson();
+            var dataSource = dsb.Build();
+
+            services.AddDbContext<ApplicationDbContext>(opt => opt
+                .UseNpgsql(dataSource, b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+                .UseSnakeCaseNamingConvention()
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors());
+        }
 
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
