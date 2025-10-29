@@ -10,6 +10,7 @@ public sealed class CourseScheduleConfiguration : IEntityTypeConfiguration<Cours
     {
         b.ToTable("course_schedules");
         b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
         b.Property(x => x.Topic).IsRequired().HasMaxLength(100);
         b.Property(x => x.IsActive).IsRequired();
         b.Property(x => x.CreatedAt).IsRequired();

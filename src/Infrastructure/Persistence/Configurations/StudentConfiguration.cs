@@ -10,6 +10,7 @@ public sealed class StudentConfiguration : IEntityTypeConfiguration<Student>
     {
         b.ToTable("students");
         b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
         b.Property(x => x.StudentNumber).IsRequired().HasMaxLength(20);
         b.HasIndex(x => x.StudentNumber).IsUnique();
         b.Property(x => x.FullName).IsRequired().HasMaxLength(100);
