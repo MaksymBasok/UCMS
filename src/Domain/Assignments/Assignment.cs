@@ -2,16 +2,26 @@
 
 public sealed class Assignment
 {
-    public Guid Id { get; private set; }
-    public Guid CourseId { get; private set; }
-    public string Title { get; private set; } = default!;
-    public string Description { get; private set; } = default!;
+    public Guid Id { get; }
+    public Guid CourseId { get; }
+    public string Title { get; private set; }
+    public string Description { get; private set; }
     public DateTime DueDate { get; private set; }
     public AssignmentStatus Status { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+    public DateTime CreatedAt { get; }
     public DateTime? UpdatedAt { get; private set; }
 
-    private Assignment() { }
+    private Assignment(Guid id, Guid courseId, string title, string description, DateTime dueDate, AssignmentStatus status, DateTime createdAt, DateTime? updatedAt)
+    {
+        Id = id;
+        CourseId = courseId;
+        Title = title;
+        Description = description;
+        DueDate = dueDate;
+        Status = status;
+        CreatedAt = createdAt;
+        UpdatedAt = updatedAt;
+    }
 
     public static Assignment New(Guid id, Guid courseId, string title, string description, DateTime dueDate)
     {
@@ -21,16 +31,15 @@ public sealed class Assignment
         if (string.IsNullOrWhiteSpace(description) || description.Length > 1000) throw new ArgumentException("Description");
         if (dueDate <= DateTime.UtcNow) throw new ArgumentException("DueDate");
 
-        return new Assignment
-        {
-            Id = id,
-            CourseId = courseId,
-            Title = title.Trim(),
-            Description = description.Trim(),
-            DueDate = dueDate,
-            Status = AssignmentStatus.Draft,
-            CreatedAt = DateTime.UtcNow
-        };
+        return new Assignment(
+            id,
+            courseId,
+            title.Trim(),
+            description.Trim(),
+            dueDate,
+            AssignmentStatus.Draft,
+            DateTime.UtcNow,
+            null);
     }
 
     public void Publish()
