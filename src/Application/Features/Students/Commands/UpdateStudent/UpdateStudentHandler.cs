@@ -1,6 +1,5 @@
 using LanguageExt;
 using MediatR;
-using UCMS.Application.Abstractions;
 using UCMS.Application.Abstractions.Repositories;
 using UCMS.Application.Features.Students.Dtos;
 using UCMS.Application.Features.Students.Exceptions;
@@ -11,12 +10,10 @@ public sealed class UpdateStudentHandler
     : IRequestHandler<UpdateStudentCommand, Either<StudentException, StudentDto>>
 {
     private readonly IStudentRepository _repo;
-    private readonly IUnitOfWork _uow;
 
-    public UpdateStudentHandler(IStudentRepository repo, IUnitOfWork uow)
+    public UpdateStudentHandler(IStudentRepository repo)
     {
         _repo = repo;
-        _uow = uow;
     }
 
     public async Task<Either<StudentException, StudentDto>> Handle(
@@ -31,8 +28,8 @@ public sealed class UpdateStudentHandler
                 return new StudentNotFoundException(request.Id);
             }
 
-            student.UpdateDetails(request.FullName, request.Email, request.GroupId);
-            await _uow.SaveChangesAsync(ct);
+            student.UpdateProfile(request.FirstName, request.LastName, request.Email);
+            await _repo.UpdateAsync(student, ct);
 
             return StudentDto.From(student);
         }

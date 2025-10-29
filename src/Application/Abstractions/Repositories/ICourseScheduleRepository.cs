@@ -1,7 +1,10 @@
-﻿using UCMS.Domain.Schedules;
+using UCMS.Domain.Schedules;
+
 namespace UCMS.Application.Abstractions.Repositories;
+
 public interface ICourseScheduleRepository
 {
-    Task AddAsync(CourseSchedule schedule, CancellationToken ct);
+    Task<CourseSchedule> AddAsync(CourseSchedule schedule, CancellationToken ct);
     Task<CourseSchedule?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<CourseSchedule> UpdateAsync(CourseSchedule schedule, CancellationToken ct);
 }

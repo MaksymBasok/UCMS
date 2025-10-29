@@ -11,6 +11,14 @@ public sealed class CourseRepository : ICourseRepository
 
     public CourseRepository(ApplicationDbContext db) => _db = db;
 
+    public async Task<Course> AddAsync(Course course, CancellationToken ct)
+    {
+        await _db.Courses.AddAsync(course, ct);
+        await _db.SaveChangesAsync(ct);
+
+        return course;
+    }
+
     public Task<Course?> GetByIdAsync(Guid id, CancellationToken ct)
         => _db.Courses.FirstOrDefaultAsync(x => x.Id == id, ct);
 
@@ -22,15 +30,19 @@ public sealed class CourseRepository : ICourseRepository
         return !await _db.Courses.AnyAsync(x => x.Code == code, ct);
     }
 
-    public Task AddAsync(Course course, CancellationToken ct)
+    public async Task<Course> UpdateAsync(Course course, CancellationToken ct)
     {
-        _db.Courses.Add(course);
-        return Task.CompletedTask;
+        _db.Courses.Update(course);
+        await _db.SaveChangesAsync(ct);
+
+        return course;
     }
 
-    public Task RemoveAsync(Course course, CancellationToken ct)
+    public async Task<Course> RemoveAsync(Course course, CancellationToken ct)
     {
         _db.Courses.Remove(course);
-        return Task.CompletedTask;
+        await _db.SaveChangesAsync(ct);
+
+        return course;
     }
 }

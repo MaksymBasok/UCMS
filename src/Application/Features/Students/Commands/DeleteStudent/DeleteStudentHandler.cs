@@ -1,5 +1,5 @@
+using LanguageExt;
 using MediatR;
-using UCMS.Application.Abstractions;
 using UCMS.Application.Abstractions.Repositories;
 using UCMS.Application.Features.Students.Exceptions;
 
@@ -9,34 +9,24 @@ public sealed class DeleteStudentHandler
     : IRequestHandler<DeleteStudentCommand, LanguageExt.Either<StudentException, LanguageExt.Unit>>
 {
     private readonly IStudentRepository _repo;
-    private readonly IUnitOfWork _uow;
 
-    public DeleteStudentHandler(IStudentRepository repo, IUnitOfWork uow)
+    public DeleteStudentHandler(IStudentRepository repo)
     {
         _repo = repo;
-        _uow = uow;
     }
 
     public async Task<LanguageExt.Either<StudentException, LanguageExt.Unit>> Handle(
         DeleteStudentCommand request,
         CancellationToken ct)
     {
-        try
+        var student = await _repo.GetByIdAsync(request.Id, ct);
+        if (student is null)
         {
-            var student = await _repo.GetByIdAsync(request.Id, ct);
-            if (student is null)
-            {
-                return new StudentNotFoundException(request.Id);
-            }
-
-            await _repo.RemoveAsync(student, ct);
-            await _uow.SaveChangesAsync(ct);
-
-            return LanguageExt.Unit.Default;
+            return new StudentNotFoundException(request.Id);
         }
-        catch (Exception ex)
-        {
-            return new StudentUnexpectedException(request.Id, ex);
-        }
+
+        await _repo.RemoveAsync(student, ct);
+
+        return LanguageExt.Unit.Default;
     }
 }

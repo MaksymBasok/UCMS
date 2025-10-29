@@ -1,20 +1,25 @@
-﻿namespace UCMS.Application.Features.Assignments.Commands.CloseAssignment;
+using LanguageExt;
 using MediatR;
-using UCMS.Application.Abstractions;
 using UCMS.Application.Abstractions.Repositories;
-using UCMS.Application.Features.Assignments.Dtos;
 
-public sealed class CloseAssignmentHandler : IRequestHandler<CloseAssignmentCommand, AssignmentDto>
+namespace UCMS.Application.Features.Assignments.Commands.CloseAssignment;
+
+public sealed class CloseAssignmentHandler : IRequestHandler<CloseAssignmentCommand, Unit>
 {
-    private readonly IAssignmentRepository _repo; private readonly IUnitOfWork _uow;
-    public CloseAssignmentHandler(IAssignmentRepository repo, IUnitOfWork uow)
-    { _repo = repo; _uow = uow; }
+    private readonly IAssignmentRepository _repo;
 
-    public async Task<AssignmentDto> Handle(CloseAssignmentCommand r, CancellationToken ct)
+    public CloseAssignmentHandler(IAssignmentRepository repo)
     {
-        var entity = await _repo.GetByIdAsync(r.Id, ct) ?? throw new KeyNotFoundException("Assignment not found");
+        _repo = repo;
+    }
+
+    public async Task<Unit> Handle(CloseAssignmentCommand request, CancellationToken ct)
+    {
+        var entity = await _repo.GetByIdAsync(request.Id, ct) ?? throw new KeyNotFoundException("Assignment not found");
         entity.Close();
-        await _uow.SaveChangesAsync(ct);
-        return AssignmentDto.From(entity);
+
+        await _repo.UpdateAsync(entity, ct);
+
+        return Unit.Default;
     }
 }

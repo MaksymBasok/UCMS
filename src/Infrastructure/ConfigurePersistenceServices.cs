@@ -1,17 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
-using UCMS.Application.Abstractions;
 using UCMS.Application.Abstractions.Queries;
 using UCMS.Application.Abstractions.Repositories;
 using UCMS.Infrastructure.Persistence;
 using UCMS.Infrastructure.Queries;
 using UCMS.Infrastructure.Repositories;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using EFCore.NamingConventions;
-
 
 namespace UCMS.Infrastructure;
 
@@ -38,12 +34,12 @@ public static class ConfigurePersistenceServices
             services.AddDbContext<ApplicationDbContext>(opt => opt
                 .UseNpgsql(dataSource, b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
                 .UseSnakeCaseNamingConvention()
+                .ConfigureWarnings(w => w.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning))
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors());
         }
 
         services.AddScoped<IStudentRepository, StudentRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICourseRepository, CourseRepository>();
         services.AddScoped<ICourseScheduleRepository, CourseScheduleRepository>();
         services.AddScoped<ISubmissionRepository, SubmissionRepository>();
