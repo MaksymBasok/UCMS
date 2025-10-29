@@ -11,6 +11,14 @@ public sealed class StudentRepository : IStudentRepository
 
     public StudentRepository(ApplicationDbContext db) => _db = db;
 
+    public async Task<Student> AddAsync(Student student, CancellationToken ct)
+    {
+        await _db.Students.AddAsync(student, ct);
+        await _db.SaveChangesAsync(ct);
+
+        return student;
+    }
+
     public Task<Student?> GetByIdAsync(Guid id, CancellationToken ct)
         => _db.Students.FirstOrDefaultAsync(s => s.Id == id, ct);
 
@@ -22,15 +30,19 @@ public sealed class StudentRepository : IStudentRepository
         return !await _db.Students.AnyAsync(s => s.StudentNumber == studentNumber, ct);
     }
 
-    public Task AddAsync(Student student, CancellationToken ct)
+    public async Task<Student> UpdateAsync(Student student, CancellationToken ct)
     {
-        _db.Students.Add(student);
-        return Task.CompletedTask;
+        _db.Students.Update(student);
+        await _db.SaveChangesAsync(ct);
+
+        return student;
     }
 
-    public Task RemoveAsync(Student student, CancellationToken ct)
+    public async Task<Student> RemoveAsync(Student student, CancellationToken ct)
     {
         _db.Students.Remove(student);
-        return Task.CompletedTask;
+        await _db.SaveChangesAsync(ct);
+
+        return student;
     }
 }

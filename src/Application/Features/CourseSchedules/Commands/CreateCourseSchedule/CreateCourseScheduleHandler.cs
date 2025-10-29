@@ -1,36 +1,47 @@
-﻿using MediatR;
+using LanguageExt;
+using MediatR;
 using UCMS.Application.Abstractions.Repositories;
-using UCMS.Application.Abstractions;
-using UCMS.Application.Features.CourseSchedules.Commands.CreateCourseSchedule;
 using UCMS.Application.Features.CourseSchedules.Dtos;
+using UCMS.Application.Features.CourseSchedules.Exceptions;
 using UCMS.Domain.Schedules;
 
+namespace UCMS.Application.Features.CourseSchedules.Commands.CreateCourseSchedule;
+
 public sealed class CreateCourseScheduleHandler
-    : IRequestHandler<CreateCourseScheduleCommand, CourseScheduleDto>
+    : IRequestHandler<CreateCourseScheduleCommand, Either<CourseScheduleException, CourseScheduleDto>>
 {
     private readonly ICourseScheduleRepository _repo;
-    private readonly ICourseRepository _courseRepo;
-    private readonly IUnitOfWork _uow;
 
     public CreateCourseScheduleHandler(
-        ICourseScheduleRepository repo,
-        ICourseRepository courseRepo,
-        IUnitOfWork uow)
+        ICourseScheduleRepository repo)
     {
         _repo = repo;
-        _courseRepo = courseRepo;
-        _uow = uow;
     }
 
-    public async Task<CourseScheduleDto> Handle(CreateCourseScheduleCommand r, CancellationToken ct)
+    public async Task<Either<CourseScheduleException, CourseScheduleDto>> Handle(
+        CreateCourseScheduleCommand request,
+        CancellationToken ct)
     {
-        if (await _courseRepo.GetByIdAsync(r.CourseId, ct) is null)
-            throw new KeyNotFoundException($"Course {r.CourseId} not found");
+        try
+        {
+            var schedule = CourseSchedule.New(
+                Guid.NewGuid(),
+                request.CourseId,
+                request.StartDate,
+                request.EndDate,
+                request.IsActive);
 
-        var schedule = CourseSchedule.New(Guid.NewGuid(), r.CourseId, r.Topic,
-                                         r.Frequency, r.NextSessionDate);
-        await _repo.AddAsync(schedule, ct);
-        await _uow.SaveChangesAsync(ct);
-        return CourseScheduleDto.From(schedule);
+            await _repo.AddAsync(schedule, ct);
+
+            return CourseScheduleDto.From(schedule);
+        }
+        catch (ArgumentException ex)
+        {
+            return new CourseScheduleValidationException(Guid.Empty, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return new CourseScheduleUnexpectedException(Guid.Empty, ex);
+        }
     }
 }

@@ -1,43 +1,56 @@
-﻿using MediatR;
+using LanguageExt;
+using MediatR;
+using UCMS.Application.Abstractions.Queries;
 using UCMS.Application.Abstractions.Repositories;
-using UCMS.Application.Abstractions;
-using UCMS.Application.Features.Submissions.Commands.CreateSubmission;
 using UCMS.Application.Features.Submissions.Dtos;
+using UCMS.Application.Features.Submissions.Exceptions;
 using UCMS.Domain.Submissions;
 
+namespace UCMS.Application.Features.Submissions.Commands.CreateSubmission;
+
 public sealed class CreateSubmissionHandler
-    : IRequestHandler<CreateSubmissionCommand, SubmissionDto>
+    : IRequestHandler<CreateSubmissionCommand, Either<SubmissionException, SubmissionDto>>
 {
     private readonly ISubmissionRepository _repo;
-    private readonly IStudentRepository _studentRepo;
-    private readonly IAssignmentRepository _assignmentRepo;
-    private readonly IUnitOfWork _uow;
+    private readonly ISubmissionQueries _queries;
 
     public CreateSubmissionHandler(
         ISubmissionRepository repo,
-        IStudentRepository studentRepo,
-        IAssignmentRepository assignmentRepo,
-        IUnitOfWork uow)
+        ISubmissionQueries queries)
     {
         _repo = repo;
-        _studentRepo = studentRepo;
-        _assignmentRepo = assignmentRepo;
-        _uow = uow;
+        _queries = queries;
     }
 
-    public async Task<SubmissionDto> Handle(CreateSubmissionCommand r, CancellationToken ct)
+    public async Task<Either<SubmissionException, SubmissionDto>> Handle(
+        CreateSubmissionCommand request,
+        CancellationToken ct)
     {
-        if (await _studentRepo.GetByIdAsync(r.StudentId, ct) is null)
-            throw new KeyNotFoundException($"Student {r.StudentId} not found");
+        try
+        {
+            var existing = await _queries.GetByAssignmentAndStudentAsync(request.AssignmentId, request.StudentId, ct);
+            if (existing is not null)
+            {
+                return new SubmissionAlreadyExistsException(existing.Id);
+            }
 
+            var submission = Submission.New(
+                Guid.NewGuid(),
+                request.AssignmentId,
+                request.StudentId,
+                request.ContentUrl);
 
-        if (await _assignmentRepo.GetByIdAsync(r.AssignmentId, ct) is null)
-            throw new KeyNotFoundException($"Assignment {r.AssignmentId} not found");
+            await _repo.AddAsync(submission, ct);
 
-        var submission = Submission.New(Guid.NewGuid(), r.AssignmentId, r.StudentId,
-                                        r.ContentUrl, r.SubmittedAtUtc);
-        await _repo.AddAsync(submission, ct);
-        await _uow.SaveChangesAsync(ct);
-        return SubmissionDto.From(submission);
+            return SubmissionDto.From(submission);
+        }
+        catch (ArgumentException ex)
+        {
+            return new SubmissionValidationException(Guid.Empty, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return new SubmissionUnexpectedException(Guid.Empty, ex);
+        }
     }
 }

@@ -1,15 +1,25 @@
-﻿using MediatR;
-using UCMS.Application.Abstractions;
+using LanguageExt;
+using MediatR;
 using UCMS.Application.Abstractions.Repositories;
 
 namespace UCMS.Application.Features.Submissions.Commands.CompleteSubmission;
+
 public sealed class CompleteSubmissionHandler : IRequestHandler<CompleteSubmissionCommand, Unit>
 {
-    private readonly ISubmissionRepository _repo; private readonly IUnitOfWork _uow;
-    public CompleteSubmissionHandler(ISubmissionRepository repo, IUnitOfWork uow) { _repo = repo; _uow = uow; }
-    public async Task<Unit> Handle(CompleteSubmissionCommand r, CancellationToken ct)
+    private readonly ISubmissionRepository _repo;
+
+    public CompleteSubmissionHandler(ISubmissionRepository repo)
     {
-        var s = await _repo.GetByIdAsync(r.Id, ct) ?? throw new KeyNotFoundException("Submission not found");
-        s.Complete(r.Notes, r.Grade); await _uow.SaveChangesAsync(ct); return Unit.Value;
+        _repo = repo;
+    }
+
+    public async Task<Unit> Handle(CompleteSubmissionCommand request, CancellationToken ct)
+    {
+        var submission = await _repo.GetByIdAsync(request.Id, ct) ?? throw new KeyNotFoundException("Submission not found");
+
+        submission.Complete(request.Notes, request.Grade);
+        await _repo.UpdateAsync(submission, ct);
+
+        return Unit.Default;
     }
 }
