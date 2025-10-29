@@ -17,6 +17,9 @@ public sealed class CourseRepository : ICourseRepository
     public Task<Course?> GetByCodeAsync(string code, CancellationToken ct)
         => _db.Courses.FirstOrDefaultAsync(x => x.Code == code, ct);
 
+    public async Task<bool> IsCodeUniqueAsync(string code, CancellationToken ct)
+        => !await _db.Courses.AnyAsync(x => x.Code == code, ct);
+
     public Task AddAsync(Course course, CancellationToken ct)
     {
         _db.Courses.Add(course);

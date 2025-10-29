@@ -17,6 +17,9 @@ public sealed class StudentRepository : IStudentRepository
     public Task<Student?> GetByStudentNumberAsync(string studentNumber, CancellationToken ct)
         => _db.Students.FirstOrDefaultAsync(s => s.StudentNumber == studentNumber, ct);
 
+    public Task<Student?> GetByStudentNumberAsync(string studentNumber, CancellationToken ct)
+        => _db.Students.FirstOrDefaultAsync(s => s.StudentNumber == studentNumber, ct);
+
     public Task AddAsync(Student student, CancellationToken ct)
     {
         _db.Students.Add(student);
