@@ -32,9 +32,9 @@ public sealed class CreateStudentHandler
             var student = Student.New(
                 Guid.NewGuid(),
                 request.StudentNumber,
-                request.FirstName,
-                request.LastName,
-                request.Email);
+                request.FullName,
+                request.Email,
+                request.GroupId);
 
             await _repo.AddAsync(student, ct);
 

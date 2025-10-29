@@ -28,7 +28,7 @@ public sealed class UpdateStudentHandler
                 return new StudentNotFoundException(request.Id);
             }
 
-            student.UpdateProfile(request.FirstName, request.LastName, request.Email);
+            student.UpdateDetails(request.FullName, request.Email, request.GroupId);
             await _repo.UpdateAsync(student, ct);
 
             return StudentDto.From(student);
