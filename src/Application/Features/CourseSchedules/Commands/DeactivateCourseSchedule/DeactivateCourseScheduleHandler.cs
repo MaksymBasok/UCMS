@@ -4,7 +4,7 @@ using UCMS.Application.Features.CourseSchedules.Exceptions;
 
 namespace UCMS.Application.Features.CourseSchedules.Commands.DeactivateCourseSchedule;
 
-public sealed class DeactivateCourseScheduleHandler : IRequestHandler<DeactivateCourseScheduleCommand, Unit>
+public sealed class DeactivateCourseScheduleHandler : IRequestHandler<DeactivateCourseScheduleCommand, MediatR.Unit>
 {
     private readonly ICourseScheduleRepository _repo;
 
@@ -13,7 +13,7 @@ public sealed class DeactivateCourseScheduleHandler : IRequestHandler<Deactivate
         _repo = repo;
     }
 
-    public async Task<Unit> Handle(DeactivateCourseScheduleCommand request, CancellationToken ct)
+    public async Task<MediatR.Unit> Handle(DeactivateCourseScheduleCommand request, CancellationToken ct)
     {
         var schedule = await _repo.GetByIdAsync(request.Id, ct)
             ?? throw new CourseScheduleNotFoundException(request.Id);
@@ -21,6 +21,6 @@ public sealed class DeactivateCourseScheduleHandler : IRequestHandler<Deactivate
         schedule.Deactivate();
         await _repo.UpdateAsync(schedule, ct);
 
-        return Unit.Value;
+        return MediatR.Unit.Value;
     }
 }
