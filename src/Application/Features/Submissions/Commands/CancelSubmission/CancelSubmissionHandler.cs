@@ -1,6 +1,6 @@
-using LanguageExt;
 using MediatR;
 using UCMS.Application.Abstractions.Repositories;
+using UCMS.Application.Features.Submissions.Exceptions;
 
 namespace UCMS.Application.Features.Submissions.Commands.CancelSubmission;
 
@@ -15,11 +15,12 @@ public sealed class CancelSubmissionHandler : IRequestHandler<CancelSubmissionCo
 
     public async Task<Unit> Handle(CancelSubmissionCommand request, CancellationToken ct)
     {
-        var submission = await _repo.GetByIdAsync(request.Id, ct) ?? throw new KeyNotFoundException("Submission not found");
+        var submission = await _repo.GetByIdAsync(request.Id, ct)
+            ?? throw new SubmissionNotFoundException(request.Id);
 
         submission.Cancel();
         await _repo.UpdateAsync(submission, ct);
 
-        return Unit.Default;
+        return Unit.Value;
     }
 }

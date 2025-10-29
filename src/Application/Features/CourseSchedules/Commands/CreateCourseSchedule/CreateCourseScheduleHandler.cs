@@ -12,8 +12,7 @@ public sealed class CreateCourseScheduleHandler
 {
     private readonly ICourseScheduleRepository _repo;
 
-    public CreateCourseScheduleHandler(
-        ICourseScheduleRepository repo)
+    public CreateCourseScheduleHandler(ICourseScheduleRepository repo)
     {
         _repo = repo;
     }
@@ -27,9 +26,9 @@ public sealed class CreateCourseScheduleHandler
             var schedule = CourseSchedule.New(
                 Guid.NewGuid(),
                 request.CourseId,
-                request.StartDate,
-                request.EndDate,
-                request.IsActive);
+                request.Topic,
+                request.Frequency,
+                request.NextSessionDate);
 
             await _repo.AddAsync(schedule, ct);
 
