@@ -15,5 +15,17 @@ public sealed class SubmissionConfiguration : IEntityTypeConfiguration<Submissio
         b.Property(x => x.CreatedAt).IsRequired();
         b.Property(x => x.CompletionNotes).HasMaxLength(1000);
         b.HasIndex(x => new { x.AssignmentId, x.StudentId }).IsUnique();
+
+        
+        b.HasOne<UCMS.Domain.Students.Student>()
+            .WithMany()
+            .HasForeignKey(x => x.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        
+        b.HasOne<UCMS.Domain.Assignments.Assignment>()
+            .WithMany()
+            .HasForeignKey(x => x.AssignmentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

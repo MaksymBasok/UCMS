@@ -17,7 +17,10 @@ public sealed class CourseSchedulesController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<CourseScheduleDto>> Create(CreateCourseScheduleCommand cmd, CancellationToken ct)
-        => Ok(await _m.Send(cmd, ct));
+    {
+        var created = await _m.Send(cmd, ct);
+        return Created($"api/course-schedules/{created.Id}", created);
+    }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<CourseScheduleDto>>> GetAll(CancellationToken ct)

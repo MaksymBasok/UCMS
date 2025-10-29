@@ -14,5 +14,11 @@ public sealed class CourseScheduleConfiguration : IEntityTypeConfiguration<Cours
         b.Property(x => x.IsActive).IsRequired();
         b.Property(x => x.CreatedAt).IsRequired();
         b.HasIndex(x => new { x.CourseId, x.NextSessionDate });
+
+
+        b.HasOne<UCMS.Domain.Courses.Course>()
+            .WithMany()
+            .HasForeignKey(x => x.CourseId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

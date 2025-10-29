@@ -3,6 +3,7 @@ using UCMS.Domain.Students;
 using UCMS.Domain.Courses;
 using UCMS.Domain.Schedules;
 using UCMS.Domain.Submissions;
+using UCMS.Domain.Assignments;
 
 namespace UCMS.Infrastructure.Persistence;
 
@@ -15,6 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<CourseSchedule> CourseSchedules => Set<CourseSchedule>();
     public DbSet<Submission> Submissions => Set<Submission>();
+    public DbSet<Assignment> Assignments => Set<Assignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

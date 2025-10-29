@@ -19,7 +19,10 @@ public sealed class SubmissionsController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<SubmissionDto>> Create(CreateSubmissionCommand cmd, CancellationToken ct)
-        => Ok(await _m.Send(cmd, ct));
+    {
+        var created = await _m.Send(cmd, ct);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<SubmissionDto>>> GetAll(CancellationToken ct)

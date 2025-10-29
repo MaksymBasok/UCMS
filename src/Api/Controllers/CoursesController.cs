@@ -16,7 +16,10 @@ public sealed class CoursesController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<CourseDto>> Create(CreateCourseCommand cmd, CancellationToken ct)
-        => CreatedAtAction(nameof(GetById), new { id = (await _m.Send(cmd, ct)).Id }, await _m.Send(cmd, ct));
+    {
+        var created = await _m.Send(cmd, ct);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<CourseDto>>> GetAll(CancellationToken ct)
