@@ -1,10 +1,10 @@
-using LanguageExt;
 using MediatR;
 using UCMS.Application.Abstractions.Repositories;
+using UCMS.Application.Features.Assignments.Dtos;
 
 namespace UCMS.Application.Features.Assignments.Commands.PublishAssignment;
 
-public sealed class PublishAssignmentHandler : IRequestHandler<PublishAssignmentCommand, Unit>
+public sealed class PublishAssignmentHandler : IRequestHandler<PublishAssignmentCommand, AssignmentDto>
 {
     private readonly IAssignmentRepository _repo;
 
@@ -13,13 +13,14 @@ public sealed class PublishAssignmentHandler : IRequestHandler<PublishAssignment
         _repo = repo;
     }
 
-    public async Task<Unit> Handle(PublishAssignmentCommand request, CancellationToken ct)
+    public async Task<AssignmentDto> Handle(PublishAssignmentCommand request, CancellationToken ct)
     {
-        var entity = await _repo.GetByIdAsync(request.Id, ct) ?? throw new KeyNotFoundException("Assignment not found");
-        entity.Publish();
+        var entity = await _repo.GetByIdAsync(request.Id, ct)
+            ?? throw new KeyNotFoundException("Assignment not found");
 
+        entity.Publish();
         await _repo.UpdateAsync(entity, ct);
 
-        return Unit.Default;
+        return AssignmentDto.From(entity);
     }
 }

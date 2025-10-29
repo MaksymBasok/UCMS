@@ -1,6 +1,6 @@
-using LanguageExt;
 using MediatR;
 using UCMS.Application.Abstractions.Repositories;
+using UCMS.Application.Features.CourseSchedules.Exceptions;
 
 namespace UCMS.Application.Features.CourseSchedules.Commands.DeactivateCourseSchedule;
 
@@ -15,11 +15,12 @@ public sealed class DeactivateCourseScheduleHandler : IRequestHandler<Deactivate
 
     public async Task<Unit> Handle(DeactivateCourseScheduleCommand request, CancellationToken ct)
     {
-        var schedule = await _repo.GetByIdAsync(request.Id, ct) ?? throw new KeyNotFoundException("Schedule not found");
+        var schedule = await _repo.GetByIdAsync(request.Id, ct)
+            ?? throw new CourseScheduleNotFoundException(request.Id);
 
         schedule.Deactivate();
         await _repo.UpdateAsync(schedule, ct);
 
-        return Unit.Default;
+        return Unit.Value;
     }
 }

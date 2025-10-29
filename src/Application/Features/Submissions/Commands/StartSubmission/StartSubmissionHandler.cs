@@ -1,6 +1,6 @@
-using LanguageExt;
 using MediatR;
 using UCMS.Application.Abstractions.Repositories;
+using UCMS.Application.Features.Submissions.Exceptions;
 
 namespace UCMS.Application.Features.Submissions.Commands.StartSubmission;
 
@@ -15,11 +15,12 @@ public sealed class StartSubmissionHandler : IRequestHandler<StartSubmissionComm
 
     public async Task<Unit> Handle(StartSubmissionCommand request, CancellationToken ct)
     {
-        var submission = await _repo.GetByIdAsync(request.Id, ct) ?? throw new KeyNotFoundException("Submission not found");
+        var submission = await _repo.GetByIdAsync(request.Id, ct)
+            ?? throw new SubmissionNotFoundException(request.Id);
 
         submission.StartReview();
         await _repo.UpdateAsync(submission, ct);
 
-        return Unit.Default;
+        return Unit.Value;
     }
 }
