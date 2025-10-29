@@ -15,12 +15,27 @@ public sealed class StartSubmissionHandler : IRequestHandler<StartSubmissionComm
 
     public async Task<MediatR.Unit> Handle(StartSubmissionCommand request, CancellationToken ct)
     {
-        var submission = await _repo.GetByIdAsync(request.Id, ct)
-            ?? throw new SubmissionNotFoundException(request.Id);
+        try
+        {
+            var submission = await _repo.GetByIdAsync(request.Id, ct)
+                ?? throw new SubmissionNotFoundException(request.Id);
 
-        submission.StartReview();
-        await _repo.UpdateAsync(submission, ct);
+            submission.StartReview();
+            await _repo.UpdateAsync(submission, ct);
 
-        return MediatR.Unit.Value;
+            return MediatR.Unit.Value;
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new SubmissionValidationException(request.Id, ex.Message);
+        }
+        catch (SubmissionException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new SubmissionUnexpectedException(request.Id, ex);
+        }
     }
 }
