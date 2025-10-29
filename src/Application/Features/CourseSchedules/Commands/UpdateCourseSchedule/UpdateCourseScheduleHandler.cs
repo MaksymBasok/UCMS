@@ -17,7 +17,7 @@ public sealed class UpdateCourseScheduleHandler : IRequestHandler<UpdateCourseSc
     {
         var schedule = await _repo.GetByIdAsync(request.Id, ct) ?? throw new KeyNotFoundException("Schedule not found");
 
-        schedule.UpdateDates(request.StartDate, request.EndDate);
+        schedule.UpdateSchedule(request.Topic, request.Frequency, request.NextSessionDate);
 
         await _repo.UpdateAsync(schedule, ct);
 

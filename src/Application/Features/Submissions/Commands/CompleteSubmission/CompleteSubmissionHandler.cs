@@ -4,7 +4,7 @@ using UCMS.Application.Features.Submissions.Exceptions;
 
 namespace UCMS.Application.Features.Submissions.Commands.CompleteSubmission;
 
-public sealed class CompleteSubmissionHandler : IRequestHandler<CompleteSubmissionCommand, Unit>
+public sealed class CompleteSubmissionHandler : IRequestHandler<CompleteSubmissionCommand, MediatR.Unit>
 {
     private readonly ISubmissionRepository _repo;
 
@@ -13,7 +13,7 @@ public sealed class CompleteSubmissionHandler : IRequestHandler<CompleteSubmissi
         _repo = repo;
     }
 
-    public async Task<Unit> Handle(CompleteSubmissionCommand request, CancellationToken ct)
+    public async Task<MediatR.Unit> Handle(CompleteSubmissionCommand request, CancellationToken ct)
     {
         var submission = await _repo.GetByIdAsync(request.Id, ct)
             ?? throw new SubmissionNotFoundException(request.Id);
@@ -21,6 +21,6 @@ public sealed class CompleteSubmissionHandler : IRequestHandler<CompleteSubmissi
         submission.Complete(request.Notes, request.Grade);
         await _repo.UpdateAsync(submission, ct);
 
-        return Unit.Value;
+        return MediatR.Unit.Value;
     }
 }
