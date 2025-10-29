@@ -10,6 +10,7 @@ public sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
     {
         b.ToTable("courses");
         b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
 
         b.Property(x => x.Code).IsRequired().HasMaxLength(20);
         b.HasIndex(x => x.Code).IsUnique();

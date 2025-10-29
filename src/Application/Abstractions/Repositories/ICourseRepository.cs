@@ -5,5 +5,6 @@ public interface ICourseRepository
 {
     Task AddAsync(Course course, CancellationToken ct);
     Task<Course?> GetByIdAsync(Guid id, CancellationToken ct);
-    Task<bool> IsCodeUniqueAsync(string code, CancellationToken ct);
+    Task<Course?> GetByCodeAsync(string code, CancellationToken ct);
+    Task RemoveAsync(Course course, CancellationToken ct);
 }

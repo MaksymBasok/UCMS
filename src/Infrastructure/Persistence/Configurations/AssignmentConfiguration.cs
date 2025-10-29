@@ -10,6 +10,7 @@ public sealed class AssignmentConfiguration : IEntityTypeConfiguration<Assignmen
     {
         b.ToTable("assignments");
         b.HasKey(x => x.Id);
+        b.Property(x => x.Id).ValueGeneratedNever();
         b.Property(x => x.Title).IsRequired().HasMaxLength(200);
         b.Property(x => x.Description).IsRequired().HasMaxLength(1000);
         b.Property(x => x.DueDate).IsRequired();

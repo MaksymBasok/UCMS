@@ -10,6 +10,7 @@ public sealed class StudentProfileConfiguration : IEntityTypeConfiguration<Stude
     {
         b.ToTable("student_profiles");
         b.HasKey(x => x.StudentId);
+        b.Property(x => x.StudentId).ValueGeneratedNever();
         b.Property(x => x.CreatedAt).IsRequired();
     }
 }
