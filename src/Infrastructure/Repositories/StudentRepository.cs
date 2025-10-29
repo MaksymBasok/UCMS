@@ -17,8 +17,8 @@ public sealed class StudentRepository : IStudentRepository
     public Task<Student?> GetByStudentNumberAsync(string studentNumber, CancellationToken ct)
         => _db.Students.FirstOrDefaultAsync(s => s.StudentNumber == studentNumber, ct);
 
-    public async Task<bool> IsStudentNumberUniqueAsync(string studentNumber, CancellationToken ct)
-        => !await _db.Students.AnyAsync(s => s.StudentNumber == studentNumber, ct);
+    public Task<Student?> GetByStudentNumberAsync(string studentNumber, CancellationToken ct)
+        => _db.Students.FirstOrDefaultAsync(s => s.StudentNumber == studentNumber, ct);
 
     public Task AddAsync(Student student, CancellationToken ct)
     {
