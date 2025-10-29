@@ -38,7 +38,8 @@ public sealed class CreateSubmissionHandler
                 Guid.NewGuid(),
                 request.AssignmentId,
                 request.StudentId,
-                request.ContentUrl);
+                request.ContentUrl,
+                request.SubmittedAtUtc);
 
             await _repo.AddAsync(submission, ct);
 
