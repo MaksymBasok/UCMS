@@ -1,7 +1,10 @@
-﻿using UCMS.Domain.Submissions;
+using UCMS.Domain.Submissions;
+
 namespace UCMS.Application.Abstractions.Repositories;
+
 public interface ISubmissionRepository
 {
-    Task AddAsync(Submission submission, CancellationToken ct);
+    Task<Submission> AddAsync(Submission submission, CancellationToken ct);
     Task<Submission?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<Submission> UpdateAsync(Submission submission, CancellationToken ct);
 }

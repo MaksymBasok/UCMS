@@ -1,6 +1,5 @@
 using LanguageExt;
 using MediatR;
-using UCMS.Application.Abstractions;
 using UCMS.Application.Abstractions.Repositories;
 using UCMS.Application.Features.Courses.Dtos;
 using UCMS.Application.Features.Courses.Exceptions;
@@ -11,12 +10,10 @@ public sealed class UpdateCourseHandler
     : IRequestHandler<UpdateCourseCommand, Either<CourseException, CourseDto>>
 {
     private readonly ICourseRepository _repo;
-    private readonly IUnitOfWork _uow;
 
-    public UpdateCourseHandler(ICourseRepository repo, IUnitOfWork uow)
+    public UpdateCourseHandler(ICourseRepository repo)
     {
         _repo = repo;
-        _uow = uow;
     }
 
     public async Task<Either<CourseException, CourseDto>> Handle(
@@ -32,7 +29,7 @@ public sealed class UpdateCourseHandler
             }
 
             course.UpdateDetails(request.Title, request.Description, request.Credits);
-            await _uow.SaveChangesAsync(ct);
+            await _repo.UpdateAsync(course, ct);
 
             return CourseDto.From(course);
         }

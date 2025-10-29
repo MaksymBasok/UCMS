@@ -1,6 +1,5 @@
 using LanguageExt;
 using MediatR;
-using UCMS.Application.Abstractions;
 using UCMS.Application.Abstractions.Repositories;
 using UCMS.Application.Features.Students.Dtos;
 using UCMS.Application.Features.Students.Exceptions;
@@ -12,12 +11,10 @@ public sealed class CreateStudentHandler
     : IRequestHandler<CreateStudentCommand, Either<StudentException, StudentDto>>
 {
     private readonly IStudentRepository _repo;
-    private readonly IUnitOfWork _uow;
 
-    public CreateStudentHandler(IStudentRepository repo, IUnitOfWork uow)
+    public CreateStudentHandler(IStudentRepository repo)
     {
         _repo = repo;
-        _uow = uow;
     }
 
     public async Task<Either<StudentException, StudentDto>> Handle(
@@ -26,16 +23,20 @@ public sealed class CreateStudentHandler
     {
         try
         {
-            var normalizedNumber = request.StudentNumber.Trim();
-            var existing = await _repo.GetByStudentNumberAsync(normalizedNumber, ct);
+            var existing = await _repo.GetByStudentNumberAsync(request.StudentNumber, ct);
             if (existing is not null)
             {
-                return new StudentAlreadyExistsException(existing.Id, normalizedNumber);
+                return new StudentAlreadyExistsException(existing.Id, existing.StudentNumber);
             }
 
-            var student = Student.New(Guid.NewGuid(), normalizedNumber, request.FullName, request.Email, request.GroupId);
+            var student = Student.New(
+                Guid.NewGuid(),
+                request.StudentNumber,
+                request.FirstName,
+                request.LastName,
+                request.Email);
+
             await _repo.AddAsync(student, ct);
-            await _uow.SaveChangesAsync(ct);
 
             return StudentDto.From(student);
         }
