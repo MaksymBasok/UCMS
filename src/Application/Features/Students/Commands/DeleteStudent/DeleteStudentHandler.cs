@@ -1,4 +1,3 @@
-using LanguageExt;
 using MediatR;
 using UCMS.Application.Abstractions;
 using UCMS.Application.Abstractions.Repositories;
@@ -7,7 +6,7 @@ using UCMS.Application.Features.Students.Exceptions;
 namespace UCMS.Application.Features.Students.Commands.DeleteStudent;
 
 public sealed class DeleteStudentHandler
-    : IRequestHandler<DeleteStudentCommand, Either<StudentException, LanguageExt.Unit>>
+    : IRequestHandler<DeleteStudentCommand, LanguageExt.Either<StudentException, LanguageExt.Unit>>
 {
     private readonly IStudentRepository _repo;
     private readonly IUnitOfWork _uow;
@@ -18,7 +17,7 @@ public sealed class DeleteStudentHandler
         _uow = uow;
     }
 
-    public async Task<Either<StudentException, LanguageExt.Unit>> Handle(
+    public async Task<LanguageExt.Either<StudentException, LanguageExt.Unit>> Handle(
         DeleteStudentCommand request,
         CancellationToken ct)
     {
