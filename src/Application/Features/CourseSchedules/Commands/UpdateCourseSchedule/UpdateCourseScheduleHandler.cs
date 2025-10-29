@@ -1,6 +1,7 @@
 using MediatR;
 using UCMS.Application.Abstractions.Repositories;
 using UCMS.Application.Features.CourseSchedules.Dtos;
+using UCMS.Application.Features.CourseSchedules.Exceptions;
 
 namespace UCMS.Application.Features.CourseSchedules.Commands.UpdateCourseSchedule;
 
@@ -15,12 +16,28 @@ public sealed class UpdateCourseScheduleHandler : IRequestHandler<UpdateCourseSc
 
     public async Task<CourseScheduleDto> Handle(UpdateCourseScheduleCommand request, CancellationToken ct)
     {
-        var schedule = await _repo.GetByIdAsync(request.Id, ct) ?? throw new KeyNotFoundException("Schedule not found");
+        try
+        {
+            var schedule = await _repo.GetByIdAsync(request.Id, ct)
+                ?? throw new CourseScheduleNotFoundException(request.Id);
 
-        schedule.UpdateDates(request.StartDate, request.EndDate);
+            schedule.UpdateSchedule(request.Topic, request.Frequency, request.NextSessionDate);
 
-        await _repo.UpdateAsync(schedule, ct);
+            await _repo.UpdateAsync(schedule, ct);
 
-        return CourseScheduleDto.From(schedule);
+            return CourseScheduleDto.From(schedule);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new CourseScheduleValidationException(request.Id, ex.Message);
+        }
+        catch (CourseScheduleException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new CourseScheduleUnexpectedException(request.Id, ex);
+        }
     }
 }

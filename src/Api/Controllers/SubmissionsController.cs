@@ -1,11 +1,14 @@
-﻿using MediatR;
+using LanguageExt;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using UCMS.Api.Modules.Errors;
 using UCMS.Application.Features.Submissions.Commands.CancelSubmission;
 using UCMS.Application.Features.Submissions.Commands.CompleteSubmission;
 using UCMS.Application.Features.Submissions.Commands.CreateSubmission;
 using UCMS.Application.Features.Submissions.Commands.StartSubmission;
 using UCMS.Application.Features.Submissions.Commands.UpdateSubmission;
 using UCMS.Application.Features.Submissions.Dtos;
+using UCMS.Application.Features.Submissions.Exceptions;
 using UCMS.Application.Features.Submissions.Queries.GetSubmissionById;
 using UCMS.Application.Features.Submissions.Queries.GetSubmissions;
 
@@ -15,13 +18,18 @@ namespace UCMS.Api.Controllers;
 [Route("api/submissions")]
 public sealed class SubmissionsController : ControllerBase
 {
-    private readonly IMediator _m; public SubmissionsController(IMediator m) => _m = m;
+    private readonly IMediator _m;
+
+    public SubmissionsController(IMediator m) => _m = m;
 
     [HttpPost]
     public async Task<ActionResult<SubmissionDto>> Create(CreateSubmissionCommand cmd, CancellationToken ct)
     {
-        var created = await _m.Send(cmd, ct);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        var result = await _m.Send(cmd, ct);
+
+        return result.Match<ActionResult<SubmissionDto>>(
+            created => CreatedAtAction(nameof(GetById), new { id = created.Id }, created),
+            error => error.ToObjectResult());
     }
 
     [HttpGet]
@@ -34,17 +42,57 @@ public sealed class SubmissionsController : ControllerBase
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<SubmissionDto>> Update(Guid id, UpdateSubmissionCommand body, CancellationToken ct)
-        => Ok(await _m.Send(body with { Id = id }, ct));
+    {
+        try
+        {
+            var updated = await _m.Send(body with { Id = id }, ct);
+            return Ok(updated);
+        }
+        catch (SubmissionException error)
+        {
+            return error.ToObjectResult();
+        }
+    }
 
     [HttpPatch("{id:guid}/start")]
     public async Task<IActionResult> Start(Guid id, CancellationToken ct)
-    { await _m.Send(new StartSubmissionCommand(id), ct); return NoContent(); }
+    {
+        try
+        {
+            await _m.Send(new StartSubmissionCommand(id), ct);
+            return NoContent();
+        }
+        catch (SubmissionException error)
+        {
+            return error.ToObjectResult();
+        }
+    }
 
     [HttpPost("{id:guid}/complete")]
     public async Task<IActionResult> Complete(Guid id, [FromBody] CompleteSubmissionCommand body, CancellationToken ct)
-    { await _m.Send(body with { Id = id }, ct); return NoContent(); }
+    {
+        try
+        {
+            await _m.Send(body with { Id = id }, ct);
+            return NoContent();
+        }
+        catch (SubmissionException error)
+        {
+            return error.ToObjectResult();
+        }
+    }
 
     [HttpPost("{id:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid id, CancellationToken ct)
-    { await _m.Send(new CancelSubmissionCommand(id), ct); return NoContent(); }
+    {
+        try
+        {
+            await _m.Send(new CancelSubmissionCommand(id), ct);
+            return NoContent();
+        }
+        catch (SubmissionException error)
+        {
+            return error.ToObjectResult();
+        }
+    }
 }

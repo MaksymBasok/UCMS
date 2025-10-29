@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
 
 namespace UCMS.Application.Features.CourseSchedules.Commands.DeactivateCourseSchedule;
-public sealed record DeactivateCourseScheduleCommand(Guid Id) : IRequest<Unit>;
+
+public sealed record DeactivateCourseScheduleCommand(Guid Id) : IRequest<MediatR.Unit>;
