@@ -44,11 +44,13 @@ public static class ConfigurePersistenceServices
         services.AddScoped<ICourseScheduleRepository, CourseScheduleRepository>();
         services.AddScoped<ISubmissionRepository, SubmissionRepository>();
         services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+        services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 
         services.AddScoped<ICourseQueries, CourseQueries>();
         services.AddScoped<ICourseScheduleQueries, CourseScheduleQueries>();
         services.AddScoped<ISubmissionQueries, SubmissionQueries>();
         services.AddScoped<IStudentQueries, StudentQueries>();
         services.AddScoped<IAssignmentQueries, AssignmentQueries>();
+        services.AddScoped<IEnrollmentQueries, EnrollmentQueries>();
     }
 }
