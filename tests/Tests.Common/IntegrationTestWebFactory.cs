@@ -39,13 +39,17 @@ public sealed class IntegrationTestWebFactory : WebApplicationFactory<Program>, 
         }
 
         Environment.SetEnvironmentVariable("Testing__UseInMemoryDatabase", (!IsDockerAvailable).ToString());
-        Environment.SetEnvironmentVariable("Testing__SkipMigrations", "true");
+        Environment.SetEnvironmentVariable("Testing__SkipMigrations", "false");
     }
 
     public async Task InitializeAsync()
     {
         if (IsDockerAvailable && _dbContainer is not null)
             await _dbContainer.StartAsync();
+
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -58,7 +62,7 @@ public sealed class IntegrationTestWebFactory : WebApplicationFactory<Program>, 
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Testing:UseInMemoryDatabase"] = "false",
-                ["Testing:SkipMigrations"] = "true"
+                ["Testing:SkipMigrations"] = "false"
             });
         });
 
@@ -81,13 +85,6 @@ public sealed class IntegrationTestWebFactory : WebApplicationFactory<Program>, 
     protected override void ConfigureClient(HttpClient client)
     {
         base.ConfigureClient(client);
-
-        if (!IsDockerAvailable)
-            return;
-
-        using var scope = Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        db.Database.Migrate();
     }
 
     public async Task DisposeAsync()
