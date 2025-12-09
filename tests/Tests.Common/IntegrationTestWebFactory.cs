@@ -1,15 +1,12 @@
 using System.Collections.Generic;
-using System.Linq;
 using DotNet.Testcontainers.Builders;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Npgsql;
 using Testcontainers.PostgreSql;
 using UCMS.Infrastructure.Persistence;
@@ -33,6 +30,7 @@ public sealed class IntegrationTestWebFactory : WebApplicationFactory<Program>, 
                 .WithUsername("postgres")
                 .WithPassword("postgres")
                 .Build();
+
             IsDockerAvailable = true;
         }
         catch (DockerUnavailableException)
@@ -41,26 +39,28 @@ public sealed class IntegrationTestWebFactory : WebApplicationFactory<Program>, 
         }
 
         Environment.SetEnvironmentVariable("Testing__UseInMemoryDatabase", (!IsDockerAvailable).ToString());
-        Environment.SetEnvironmentVariable("Testing__SkipMigrations", (!IsDockerAvailable).ToString());
+        Environment.SetEnvironmentVariable("Testing__SkipMigrations", "true");
+    }
+
+    public async Task InitializeAsync()
+    {
+        if (IsDockerAvailable && _dbContainer is not null)
+            await _dbContainer.StartAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((_, configurationBuilder) =>
-        {
-            configurationBuilder
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["Testing:SkipMigrations"] = (!IsDockerAvailable).ToString(),
-                    ["Testing:UseInMemoryDatabase"] = (!IsDockerAvailable).ToString()
-                })
-                .AddEnvironmentVariables();
-        });
-
         if (!IsDockerAvailable)
-        {
             return;
-        }
+
+        builder.ConfigureAppConfiguration((_, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Testing:UseInMemoryDatabase"] = "false",
+                ["Testing:SkipMigrations"] = "true"
+            });
+        });
 
         builder.ConfigureTestServices(services =>
         {
@@ -72,35 +72,27 @@ public sealed class IntegrationTestWebFactory : WebApplicationFactory<Program>, 
             var dataSource = dataSourceBuilder.Build();
 
             services.AddDbContext<ApplicationDbContext>(options => options
-                .UseNpgsql(dataSource, cfg => cfg.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
-                .UseSnakeCaseNamingConvention()
-                .ConfigureWarnings(w => w.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning)));
-
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            db.Database.Migrate();
+                .UseNpgsql(dataSource, cfg =>
+                    cfg.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+                .UseSnakeCaseNamingConvention());
         });
     }
 
-    public Task InitializeAsync()
-        => IsDockerAvailable && _dbContainer is not null
-            ? _dbContainer.StartAsync()
-            : Task.CompletedTask;
-
-    public new Task DisposeAsync()
-        => IsDockerAvailable && _dbContainer is not null
-            ? _dbContainer.DisposeAsync().AsTask()
-            : Task.CompletedTask;
-}
-
-public static class ServiceCollectionExtensions
-{
-    public static void RemoveServiceByType(this IServiceCollection services, Type serviceType)
+    protected override void ConfigureClient(HttpClient client)
     {
-        var descriptors = services.Where(s => s.ServiceType == serviceType).ToList();
-        foreach (var descriptor in descriptors)
-        {
-            services.Remove(descriptor);
-        }
+        base.ConfigureClient(client);
+
+        if (!IsDockerAvailable)
+            return;
+
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+    }
+
+    public async Task DisposeAsync()
+    {
+        if (IsDockerAvailable && _dbContainer is not null)
+            await _dbContainer.DisposeAsync();
     }
 }
