@@ -14,5 +14,17 @@ public sealed class GetEnrollmentsHandler : IRequestHandler<GetEnrollmentsQuery,
     }
 
     public Task<IReadOnlyList<EnrollmentDto>> Handle(GetEnrollmentsQuery request, CancellationToken ct)
-        => _queries.GetAllAsync(ct);
+    {
+        if (request.StudentId is Guid studentId)
+        {
+            return _queries.GetByStudentAsync(studentId, ct);
+        }
+
+        if (request.CourseId is Guid courseId)
+        {
+            return _queries.GetByCourseAsync(courseId, ct);
+        }
+
+        return _queries.GetAllAsync(ct);
+    }
 }

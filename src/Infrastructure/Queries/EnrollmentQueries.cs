@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using UCMS.Application.Abstractions.Queries;
 using UCMS.Application.Features.Enrollments.Dtos;
