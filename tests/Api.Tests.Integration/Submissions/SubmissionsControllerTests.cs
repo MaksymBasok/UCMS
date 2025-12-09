@@ -106,7 +106,7 @@ public sealed class SubmissionsControllerTests : BaseIntegrationTest, IAsyncLife
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var dto = await response.ToResponseModel<SubmissionDto>();
         dto.Id.Should().Be(_openSubmission.Id);
-        dto.Status.Should().Be(_openSubmission.Status.ToString());
+        dto.Status.Should().Be(_openSubmission.Status);
     }
 
     [Fact]

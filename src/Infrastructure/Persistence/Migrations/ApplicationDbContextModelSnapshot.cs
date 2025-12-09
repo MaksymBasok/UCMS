@@ -25,7 +25,6 @@ namespace UCMS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("UCMS.Domain.Assignments.Assignment", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -73,7 +72,6 @@ namespace UCMS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("UCMS.Domain.Courses.Course", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -120,17 +118,16 @@ namespace UCMS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("UCMS.Domain.Enrollments.Enrollment", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("course_id");
 
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("completed_at");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("course_id");
 
                     b.Property<DateTime>("EnrolledAt")
                         .HasColumnType("timestamp with time zone")
@@ -154,9 +151,6 @@ namespace UCMS.Infrastructure.Persistence.Migrations
                     b.HasIndex("CourseId")
                         .HasDatabaseName("ix_enrollments_course_id");
 
-                    b.HasIndex("StudentId")
-                        .HasDatabaseName("ix_enrollments_student_id");
-
                     b.HasIndex("StudentId", "CourseId")
                         .IsUnique()
                         .HasDatabaseName("ix_enrollments_student_id_course_id");
@@ -167,7 +161,6 @@ namespace UCMS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("UCMS.Domain.Schedules.CourseSchedule", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -213,7 +206,6 @@ namespace UCMS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("UCMS.Domain.Students.Student", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -294,7 +286,6 @@ namespace UCMS.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("UCMS.Domain.Submissions.Submission", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -360,16 +351,6 @@ namespace UCMS.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_assignments_courses_course_id");
                 });
 
-            modelBuilder.Entity("UCMS.Domain.Schedules.CourseSchedule", b =>
-                {
-                    b.HasOne("UCMS.Domain.Courses.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_course_schedules_courses_course_id");
-                });
-
             modelBuilder.Entity("UCMS.Domain.Enrollments.Enrollment", b =>
                 {
                     b.HasOne("UCMS.Domain.Courses.Course", null)
@@ -385,6 +366,16 @@ namespace UCMS.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_enrollments_students_student_id");
+                });
+
+            modelBuilder.Entity("UCMS.Domain.Schedules.CourseSchedule", b =>
+                {
+                    b.HasOne("UCMS.Domain.Courses.Course", null)
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_course_schedules_courses_course_id");
                 });
 
             modelBuilder.Entity("UCMS.Domain.Students.StudentProfile", b =>

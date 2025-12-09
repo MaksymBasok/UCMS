@@ -36,10 +36,13 @@ public sealed class CoursesControllerTests : BaseIntegrationTest, IAsyncLifetime
     [Fact]
     public async Task ShouldGetCourseById()
     {
+        // Arrange
         await ResetDatabaseAsync();
 
+        // Act
         var response = await Client.GetAsync($"{BaseRoute}/{_firstCourse.Id}");
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var dto = await response.ToResponseModel<CourseDto>();
         dto.Id.Should().Be(_firstCourse.Id);
@@ -52,22 +55,28 @@ public sealed class CoursesControllerTests : BaseIntegrationTest, IAsyncLifetime
     [Fact]
     public async Task ShouldReturnNotFoundWhenCourseDoesNotExist()
     {
+        // Arrange
         await ResetDatabaseAsync();
+        var nonExistingId = Guid.NewGuid();
 
-        var response = await Client.GetAsync($"{BaseRoute}/{Guid.NewGuid()}");
+        // Act
+        var response = await Client.GetAsync($"{BaseRoute}/{nonExistingId}");
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task ShouldCreateCourse()
     {
+        // Arrange
         await ResetDatabaseAsync();
-
         var request = new CreateCourseCommand("INT-200", "New Course", "New course description", 4);
 
+        // Act
         var response = await Client.PostAsJsonAsync(BaseRoute, request);
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var dto = await response.ToResponseModel<CourseDto>();
         dto.Code.Should().Be(request.Code);
@@ -82,38 +91,43 @@ public sealed class CoursesControllerTests : BaseIntegrationTest, IAsyncLifetime
     [Fact]
     public async Task ShouldNotCreateDuplicateCourse()
     {
+        // Arrange
         await ResetDatabaseAsync();
-
         var request = new CreateCourseCommand(_firstCourse.Code, "Another", "Another description", 5);
 
+        // Act
         var response = await Client.PostAsJsonAsync(BaseRoute, request);
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact]
     public async Task ShouldNotCreateCourseWithInvalidData()
     {
+        // Arrange
         await ResetDatabaseAsync();
-
         var request = new CreateCourseCommand(" ", string.Empty, string.Empty, 0);
 
+        // Act
         var response = await Client.PostAsJsonAsync(BaseRoute, request);
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
     public async Task ShouldUpdateCourse()
     {
+        // Arrange
         await ResetDatabaseAsync();
-
         var request = new UpdateCourseCommand(_firstCourse.Id, "Updated", "Updated description", 7);
 
+        // Act
         var response = await Client.PutAsJsonAsync($"{BaseRoute}/{_firstCourse.Id}", request);
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var updated = await Context.Courses.FindAsync(_firstCourse.Id);
         updated!.Title.Should().Be(request.Title);
         updated.Description.Should().Be(request.Description);
@@ -123,36 +137,42 @@ public sealed class CoursesControllerTests : BaseIntegrationTest, IAsyncLifetime
     [Fact]
     public async Task ShouldNotUpdateWithInvalidData()
     {
+        // Arrange
         await ResetDatabaseAsync();
-
         var request = new UpdateCourseCommand(_firstCourse.Id, string.Empty, string.Empty, 0);
 
+        // Act
         var response = await Client.PutAsJsonAsync($"{BaseRoute}/{_firstCourse.Id}", request);
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
     public async Task ShouldReturnNotFoundWhenUpdatingNonExistingCourse()
     {
+        // Arrange
         await ResetDatabaseAsync();
-
         var request = new UpdateCourseCommand(Guid.NewGuid(), "Name", "Description", 5);
 
+        // Act
         var response = await Client.PutAsJsonAsync($"{BaseRoute}/{request.Id}", request);
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task ShouldDeleteCourse()
     {
+        // Arrange
         await ResetDatabaseAsync();
 
+        // Act
         var response = await Client.DeleteAsync($"{BaseRoute}/{_firstCourse.Id}");
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
         var exists = await Context.Courses.AnyAsync(x => x.Id == _firstCourse.Id);
         exists.Should().BeFalse();
     }
@@ -160,10 +180,14 @@ public sealed class CoursesControllerTests : BaseIntegrationTest, IAsyncLifetime
     [Fact]
     public async Task ShouldReturnNotFoundWhenDeletingNonExistingCourse()
     {
+        // Arrange
         await ResetDatabaseAsync();
+        var nonExistingId = Guid.NewGuid();
 
-        var response = await Client.DeleteAsync($"{BaseRoute}/{Guid.NewGuid()}");
+        // Act
+        var response = await Client.DeleteAsync($"{BaseRoute}/{nonExistingId}");
 
+        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 

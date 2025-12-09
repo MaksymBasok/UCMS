@@ -42,16 +42,24 @@ public static class DbInitializer
 
             if (studentId != Guid.Empty && assignmentId != Guid.Empty)
             {
-                var subOpen = Submission.New(Guid.NewGuid(), assignmentId, studentId, "https://files/sub-open.pdf", DateTime.UtcNow);
+                // Створюємо один submission (початковий стан)
+                var submission = Submission.New(
+                    Guid.NewGuid(),
+                    assignmentId,
+                    studentId,
+                    "https://files/sub-open.pdf",
+                    DateTime.UtcNow
+                );
 
-                var subProg = Submission.New(Guid.NewGuid(), assignmentId, studentId, "https://files/sub-inprogress.pdf", DateTime.UtcNow);
-                subProg.StartReview();
+                db.Submissions.Add(submission);
+                await db.SaveChangesAsync(ct);
 
-                var subDone = Submission.New(Guid.NewGuid(), assignmentId, studentId, "https://files/sub-completed.pdf", DateTime.UtcNow);
-                subDone.StartReview();
-                subDone.Complete("Looks good", 95m);
+                // Перехід у стан "InProgress"
+                submission.StartReview();
+                await db.SaveChangesAsync(ct);
 
-                db.Submissions.AddRange(subOpen, subProg, subDone);
+                // Завершення роботи
+                submission.Complete("Looks good", 95m);
                 await db.SaveChangesAsync(ct);
             }
         }
