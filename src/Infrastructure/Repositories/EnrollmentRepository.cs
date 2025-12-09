@@ -35,4 +35,12 @@ public sealed class EnrollmentRepository : IEnrollmentRepository
 
         return enrollment;
     }
+
+    public async Task<Enrollment> RemoveAsync(Enrollment enrollment, CancellationToken ct)
+    {
+        _db.Enrollments.Remove(enrollment);
+        await _db.SaveChangesAsync(ct);
+
+        return enrollment;
+    }
 }

@@ -8,4 +8,5 @@ public interface IEnrollmentRepository
     Task<Enrollment?> GetByIdAsync(Guid id, CancellationToken ct);
     Task<Enrollment?> GetByStudentAndCourseAsync(Guid studentId, Guid courseId, CancellationToken ct);
     Task<Enrollment> UpdateAsync(Enrollment enrollment, CancellationToken ct);
+    Task<Enrollment> RemoveAsync(Enrollment enrollment, CancellationToken ct);
 }

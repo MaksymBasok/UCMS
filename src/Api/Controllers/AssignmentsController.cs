@@ -5,6 +5,7 @@ using UCMS.Application.Features.Assignments.Commands.CreateAssignment;
 using UCMS.Application.Features.Assignments.Commands.UpdateAssignment;
 using UCMS.Application.Features.Assignments.Commands.PublishAssignment;
 using UCMS.Application.Features.Assignments.Commands.CloseAssignment;
+using UCMS.Application.Features.Assignments.Commands.DeleteAssignment;
 using UCMS.Application.Features.Assignments.Queries.GetAssignments;
 using UCMS.Application.Features.Assignments.Queries.GetAssignmentById;
 
@@ -40,4 +41,18 @@ public sealed class AssignmentsController : ControllerBase
     [HttpPatch("{id:guid}/close")]
     public Task<AssignmentDto> Close(Guid id, CancellationToken ct)
         => _mediator.Send(new CloseAssignmentCommand(id), ct);
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            await _mediator.Send(new DeleteAssignmentCommand(id), ct);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
 }

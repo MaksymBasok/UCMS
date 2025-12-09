@@ -5,6 +5,7 @@ using UCMS.Api.Modules.Errors;
 using UCMS.Application.Features.Enrollments.Commands.CompleteEnrollment;
 using UCMS.Application.Features.Enrollments.Commands.CreateEnrollment;
 using UCMS.Application.Features.Enrollments.Commands.DropEnrollment;
+using UCMS.Application.Features.Enrollments.Commands.DeleteEnrollment;
 using UCMS.Application.Features.Enrollments.Dtos;
 using UCMS.Application.Features.Enrollments.Exceptions;
 using UCMS.Application.Features.Enrollments.Queries.GetEnrollmentById;
@@ -64,5 +65,15 @@ public sealed class EnrollmentsController : ControllerBase
     {
         var result = await _mediator.Send(new DropEnrollmentCommand(id), ct);
         return result.Match<ActionResult<EnrollmentDto>>(value => Ok(value), error => error.ToObjectResult());
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new DeleteEnrollmentCommand(id), ct);
+
+        return result.Match<IActionResult>(
+            _ => NoContent(),
+            error => error.ToObjectResult());
     }
 }

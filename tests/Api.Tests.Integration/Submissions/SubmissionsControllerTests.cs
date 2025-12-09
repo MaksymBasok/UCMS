@@ -188,6 +188,28 @@ public sealed class SubmissionsControllerTests : BaseIntegrationTest, IAsyncLife
         stored.Status.Should().Be(SubmissionStatus.Cancelled);
     }
 
+    [Fact]
+    public async Task ShouldDeleteSubmission()
+    {
+        await ResetDatabaseAsync();
+
+        var response = await Client.DeleteAsync($"{BaseRoute}/{_openSubmission.Id}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var exists = await Context.Submissions.AnyAsync(x => x.Id == _openSubmission.Id);
+        exists.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ShouldReturnNotFoundWhenDeletingMissingSubmission()
+    {
+        await ResetDatabaseAsync();
+
+        var response = await Client.DeleteAsync($"{BaseRoute}/{Guid.NewGuid()}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     private async Task ResetDatabaseAsync()
     {
         await EnsureDatabaseAsync();

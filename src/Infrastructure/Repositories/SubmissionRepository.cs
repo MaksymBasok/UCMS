@@ -29,4 +29,12 @@ public sealed class SubmissionRepository : ISubmissionRepository
 
         return submission;
     }
+
+    public async Task<Submission> RemoveAsync(Submission submission, CancellationToken ct)
+    {
+        _db.Submissions.Remove(submission);
+        await _db.SaveChangesAsync(ct);
+
+        return submission;
+    }
 }

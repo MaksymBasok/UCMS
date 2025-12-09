@@ -7,6 +7,7 @@ using UCMS.Application.Features.Submissions.Commands.CompleteSubmission;
 using UCMS.Application.Features.Submissions.Commands.CreateSubmission;
 using UCMS.Application.Features.Submissions.Commands.StartSubmission;
 using UCMS.Application.Features.Submissions.Commands.UpdateSubmission;
+using UCMS.Application.Features.Submissions.Commands.DeleteSubmission;
 using UCMS.Application.Features.Submissions.Dtos;
 using UCMS.Application.Features.Submissions.Exceptions;
 using UCMS.Application.Features.Submissions.Queries.GetSubmissionById;
@@ -88,6 +89,20 @@ public sealed class SubmissionsController : ControllerBase
         try
         {
             await _m.Send(new CancelSubmissionCommand(id), ct);
+            return NoContent();
+        }
+        catch (SubmissionException error)
+        {
+            return error.ToObjectResult();
+        }
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            await _m.Send(new DeleteSubmissionCommand(id), ct);
             return NoContent();
         }
         catch (SubmissionException error)
