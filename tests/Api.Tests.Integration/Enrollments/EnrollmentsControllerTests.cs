@@ -162,6 +162,28 @@ public sealed class EnrollmentsControllerTests : BaseIntegrationTest, IAsyncLife
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    [Fact]
+    public async Task ShouldDeleteEnrollment()
+    {
+        await ResetDatabaseAsync();
+
+        var response = await Client.DeleteAsync($"{BaseRoute}/{_activeEnrollment.Id}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var exists = await Context.Enrollments.AnyAsync(x => x.Id == _activeEnrollment.Id);
+        exists.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ShouldReturnNotFoundWhenDeletingMissingEnrollment()
+    {
+        await ResetDatabaseAsync();
+
+        var response = await Client.DeleteAsync($"{BaseRoute}/{Guid.NewGuid()}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     private async Task ResetDatabaseAsync()
     {
         await EnsureDatabaseAsync();

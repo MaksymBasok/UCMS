@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Tests.Common;
 using Tests.Data.Assignments;
 using Tests.Data.Courses;
@@ -160,6 +161,28 @@ public sealed class AssignmentsControllerTests : BaseIntegrationTest, IAsyncLife
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var dto = await response.ToResponseModel<AssignmentDto>();
         dto.Status.Should().Be(AssignmentStatus.Closed.ToString());
+    }
+
+    [Fact]
+    public async Task ShouldDeleteAssignment()
+    {
+        await ResetDatabaseAsync();
+
+        var response = await Client.DeleteAsync($"{BaseRoute}/{_firstAssignment.Id}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var exists = await Context.Assignments.AnyAsync(x => x.Id == _firstAssignment.Id);
+        exists.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ShouldReturnNotFoundWhenDeletingMissingAssignment()
+    {
+        await ResetDatabaseAsync();
+
+        var response = await Client.DeleteAsync($"{BaseRoute}/{Guid.NewGuid()}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     private async Task ResetDatabaseAsync()
