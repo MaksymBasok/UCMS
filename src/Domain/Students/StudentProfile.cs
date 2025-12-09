@@ -2,6 +2,9 @@
 
 public sealed class StudentProfile
 {
+    public const int AddressMaxLength = 500;
+    public const int PhoneMaxLength = 30;
+
     public Guid StudentId { get; }
     public DateTime? DateOfBirth { get; private set; }
     public string? Address { get; private set; }
@@ -22,6 +25,8 @@ public sealed class StudentProfile
     public static StudentProfile New(Guid studentId, DateTime? dob, string? address, string? phone)
     {
         if (studentId == Guid.Empty) throw new ArgumentException("StudentId");
+        if (address?.Length > AddressMaxLength) throw new ArgumentException("Address");
+        if (phone?.Length > PhoneMaxLength) throw new ArgumentException("Phone");
 
         return new StudentProfile(
             studentId,
@@ -34,6 +39,9 @@ public sealed class StudentProfile
 
     public void Update(string? address, string? phone, DateTime? dob)
     {
+        if (address?.Length > AddressMaxLength) throw new ArgumentException("Address");
+        if (phone?.Length > PhoneMaxLength) throw new ArgumentException("Phone");
+
         Address = address?.Trim();
         Phone = phone?.Trim();
         DateOfBirth = dob;

@@ -264,7 +264,8 @@ namespace UCMS.Infrastructure.Persistence.Migrations
                         .HasColumnName("student_id");
 
                     b.Property<string>("Address")
-                        .HasColumnType("text")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("address");
 
                     b.Property<DateTime>("CreatedAt")
@@ -276,7 +277,8 @@ namespace UCMS.Infrastructure.Persistence.Migrations
                         .HasColumnName("date_of_birth");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("text")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
                         .HasColumnName("phone");
 
                     b.Property<DateTime?>("UpdatedAt")

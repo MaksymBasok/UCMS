@@ -12,5 +12,7 @@ public sealed class StudentProfileConfiguration : IEntityTypeConfiguration<Stude
         b.HasKey(x => x.StudentId);
         b.Property(x => x.StudentId).ValueGeneratedNever();
         b.Property(x => x.CreatedAt).IsRequired();
+        b.Property(x => x.Address).HasMaxLength(StudentProfile.AddressMaxLength);
+        b.Property(x => x.Phone).HasMaxLength(StudentProfile.PhoneMaxLength);
     }
 }
