@@ -19,4 +19,12 @@ public static class StudentData
             "Jane Smith",
             "jane.smith@example.com",
             Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"));
+
+    public static Student ThirdStudent()
+        => Student.New(
+            Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
+            "STU-003",
+            "Alice Johnson",
+            "alice.johnson@example.com",
+            Guid.Parse("ffffffff-ffff-ffff-ffff-ffffffffffff"));
 }
