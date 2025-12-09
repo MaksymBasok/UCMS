@@ -75,6 +75,10 @@ public sealed class IntegrationTestWebFactory : WebApplicationFactory<Program>, 
                 .UseNpgsql(dataSource, cfg => cfg.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
                 .UseSnakeCaseNamingConvention()
                 .ConfigureWarnings(w => w.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning)));
+
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            db.Database.Migrate();
         });
     }
 
