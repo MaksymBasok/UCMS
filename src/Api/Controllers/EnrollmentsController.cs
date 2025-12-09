@@ -9,8 +9,6 @@ using UCMS.Application.Features.Enrollments.Dtos;
 using UCMS.Application.Features.Enrollments.Exceptions;
 using UCMS.Application.Features.Enrollments.Queries.GetEnrollmentById;
 using UCMS.Application.Features.Enrollments.Queries.GetEnrollments;
-using UCMS.Application.Features.Enrollments.Queries.GetEnrollmentsByCourse;
-using UCMS.Application.Features.Enrollments.Queries.GetEnrollmentsByStudent;
 
 namespace UCMS.Api.Controllers;
 
@@ -43,17 +41,8 @@ public sealed class EnrollmentsController : ControllerBase
         [FromQuery] Guid? courseId,
         CancellationToken ct)
     {
-        if (studentId is { } sid)
-        {
-            return Ok(await _mediator.Send(new GetEnrollmentsByStudentQuery(sid), ct));
-        }
-
-        if (courseId is { } cid)
-        {
-            return Ok(await _mediator.Send(new GetEnrollmentsByCourseQuery(cid), ct));
-        }
-
-        return Ok(await _mediator.Send(new GetEnrollmentsQuery(), ct));
+        var response = await _mediator.Send(new GetEnrollmentsQuery(studentId, courseId), ct);
+        return Ok(response);
     }
 
     [HttpGet("{id:guid}")]
@@ -67,13 +56,13 @@ public sealed class EnrollmentsController : ControllerBase
     public async Task<ActionResult<EnrollmentDto>> Complete(Guid id, CancellationToken ct)
     {
         var result = await _mediator.Send(new CompleteEnrollmentCommand(id), ct);
-        return result.Match<ActionResult<EnrollmentDto>>(Ok, error => error.ToObjectResult());
+        return result.Match<ActionResult<EnrollmentDto>>(value => Ok(value), error => error.ToObjectResult());
     }
 
     [HttpPatch("{id:guid}/drop")]
     public async Task<ActionResult<EnrollmentDto>> Drop(Guid id, CancellationToken ct)
     {
         var result = await _mediator.Send(new DropEnrollmentCommand(id), ct);
-        return result.Match<ActionResult<EnrollmentDto>>(Ok, error => error.ToObjectResult());
+        return result.Match<ActionResult<EnrollmentDto>>(value => Ok(value), error => error.ToObjectResult());
     }
 }
