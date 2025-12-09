@@ -30,6 +30,7 @@ public sealed class SubmissionsControllerTests : BaseIntegrationTest, IAsyncLife
     private Assignment _assignment = null!;
     private Student _firstStudent = null!;
     private Student _secondStudent = null!;
+    private Student _thirdStudent = null!;
     private Submission _openSubmission = null!;
     private Submission _completedSubmission = null!;
 
@@ -56,7 +57,7 @@ public sealed class SubmissionsControllerTests : BaseIntegrationTest, IAsyncLife
 
         var command = new CreateSubmissionCommand(
             _assignment.Id,
-            _secondStudent.Id,
+            _thirdStudent.Id,
             "https://example.com/submissions/new",
             DateTime.UtcNow);
 
@@ -189,6 +190,8 @@ public sealed class SubmissionsControllerTests : BaseIntegrationTest, IAsyncLife
 
     private async Task ResetDatabaseAsync()
     {
+        await EnsureDatabaseAsync();
+
         Context.Submissions.RemoveRange(Context.Submissions);
         Context.Assignments.RemoveRange(Context.Assignments);
         Context.Students.RemoveRange(Context.Students);
@@ -199,12 +202,13 @@ public sealed class SubmissionsControllerTests : BaseIntegrationTest, IAsyncLife
         _assignment = AssignmentData.FirstAssignment(_course.Id);
         _firstStudent = StudentData.FirstStudent();
         _secondStudent = StudentData.SecondStudent();
+        _thirdStudent = StudentData.ThirdStudent();
         _openSubmission = SubmissionData.OpenSubmission(_assignment.Id, _firstStudent.Id);
         _completedSubmission = SubmissionData.CompletedSubmission(_assignment.Id, _secondStudent.Id);
 
         await Context.Courses.AddAsync(_course);
         await Context.Assignments.AddAsync(_assignment);
-        await Context.Students.AddRangeAsync(_firstStudent, _secondStudent);
+        await Context.Students.AddRangeAsync(_firstStudent, _secondStudent, _thirdStudent);
         await Context.Submissions.AddRangeAsync(_openSubmission, _completedSubmission);
         await SaveChangesAsync();
     }

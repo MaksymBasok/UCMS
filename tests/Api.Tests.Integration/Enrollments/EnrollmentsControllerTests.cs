@@ -164,6 +164,8 @@ public sealed class EnrollmentsControllerTests : BaseIntegrationTest, IAsyncLife
 
     private async Task ResetDatabaseAsync()
     {
+        await EnsureDatabaseAsync();
+
         Context.Enrollments.RemoveRange(Context.Enrollments);
         Context.Students.RemoveRange(Context.Students);
         Context.Courses.RemoveRange(Context.Courses);
